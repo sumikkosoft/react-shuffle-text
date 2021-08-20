@@ -9,6 +9,8 @@ type ShuffleTextProps = {
   intervalTime?: number;
   hover?: boolean;
   click?: boolean;
+  style?: any;
+  className?: string;
 };
 
 export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
@@ -21,6 +23,8 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
     intervalTime = 10,
     hover = false,
     click = false,
+    style = {},
+    className = "",
     children,
   } = props;
   const ShuffleTextElement = useMemo(() => {
@@ -122,5 +126,9 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
     return events;
   }, [hover, click, init, handleShuffle, startDelay]);
 
-  return <ShuffleTextElement {...onEvents}>{outputText}</ShuffleTextElement>;
+  return (
+    <ShuffleTextElement {...onEvents} {...style} {...className}>
+      {outputText}
+    </ShuffleTextElement>
+  );
 };
