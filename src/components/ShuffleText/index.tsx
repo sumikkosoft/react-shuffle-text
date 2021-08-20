@@ -8,6 +8,7 @@ type ShuffleTextProps = {
   displayTime?: number;
   intervalTime?: number;
   hover?: boolean;
+  click?: boolean;
 };
 
 export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
@@ -19,6 +20,7 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
     displayTime = 1000,
     intervalTime = 10,
     hover = false,
+    click = false,
     children,
   } = props;
   const ShuffleTextElement = useMemo(() => {
@@ -31,12 +33,17 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
   const [outputText, setOutputText] = useState<string>("");
   const refText = useRef<string>("");
   const refTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const refRequestAnimationFrame = useRef<ReturnType<typeof requestAnimationFrame> | undefined>(
+    undefined
+  );
   const initTime = useRef<number>(0);
+  const prevTime = useRef<number>(0);
   const shuffleLength = useRef<number>(0);
   const outputLength = useRef<number>(0);
 
   const init = useCallback((): void => {
-    clearTimeout(refTimer.current);
+    if (refRequestAnimationFrame.current) cancelAnimationFrame(refRequestAnimationFrame.current);
+    if (refTimer.current) refTimer.current;
     initTime.current = new Date().getTime();
     refText.current = "";
     shuffleLength.current = 0;
@@ -61,45 +68,59 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
 
     const currentTime = new Date().getTime();
 
-    if (text.length > refText.current.length) {
-      refText.current += emptyChars;
-    }
+    if (currentTime - prevTime.current > intervalTime) {
+      prevTime.current = currentTime;
 
-    refText.current =
-      generateRandomChars(shuffleLength.current) + refText.current.slice(shuffleLength.current);
+      if (text.length > refText.current.length) {
+        refText.current += emptyChars;
+      }
 
-    if (text.length > shuffleLength.current && refText.current.length > 2)
-      shuffleLength.current += 1;
-
-    if (currentTime - initTime.current > displayTime) {
-      outputLength.current += 1;
       refText.current =
-        text.slice(0, outputLength.current) + refText.current.slice(outputLength.current);
+        generateRandomChars(shuffleLength.current) + refText.current.slice(shuffleLength.current);
+
+      if (text.length > shuffleLength.current && refText.current.length > 2)
+        shuffleLength.current += 1;
+
+      if (currentTime - initTime.current > displayTime) {
+        outputLength.current += 1;
+        refText.current =
+          text.slice(0, outputLength.current) + refText.current.slice(outputLength.current);
+      }
+
+      setOutputText(refText.current);
     }
 
-    setOutputText(refText.current);
-
-    refTimer.current = setTimeout(handleShuffle, intervalTime);
+    refRequestAnimationFrame.current = requestAnimationFrame(handleShuffle);
   }, [displayTime, emptyChars, generateRandomChars, intervalTime, text]);
 
-  const start = useCallback((): void => {
-    init();
-    setTimeout(handleShuffle, startDelay);
-  }, [handleShuffle, init, startDelay]);
-
   useEffect(() => {
-    start();
+    init();
+    refTimer.current = setTimeout(handleShuffle, startDelay);
 
     return () => clearTimeout(refTimer.current);
-  }, [start]);
+  }, [handleShuffle, init, startDelay]);
 
-  return (
-    <ShuffleTextElement
-      onMouseOver={() => {
-        if (hover) start();
-      }}
-    >
-      {outputText}
-    </ShuffleTextElement>
-  );
+  const onEvents = useMemo(() => {
+    const events: {
+      onMouseOver?: () => void;
+      onClick?: () => void;
+    } = {};
+    if (hover) {
+      events.onMouseOver = () => {
+        init();
+        refTimer.current = setTimeout(handleShuffle, startDelay);
+      };
+    }
+
+    if (click) {
+      events.onClick = () => {
+        init();
+        refTimer.current = setTimeout(handleShuffle, startDelay);
+      };
+    }
+
+    return events;
+  }, [hover, click, init, handleShuffle, startDelay]);
+
+  return <ShuffleTextElement {...onEvents}>{outputText}</ShuffleTextElement>;
 };
