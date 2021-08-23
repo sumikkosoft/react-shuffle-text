@@ -32,7 +32,7 @@ const PageFooter = React.memo(() => {
 const PageContent: React.VFC<{ text: string; options: ShuffleTextProps }> = React.memo(
   ({ text, options }) => {
     return (
-      <h1 className="text-4xl font-bold h-12">
+      <h1 className="text-4xl font-bold h-12 py-4 box-content">
         <ShuffleText {...options}>{text.length ? text : "Shuffle Text"}</ShuffleText>
       </h1>
     );
