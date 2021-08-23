@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type ShuffleTextProps = {
+export type ShuffleTextProps = {
   tag?: keyof JSX.IntrinsicElements;
   emptyChars?: string;
   randomChars?: string;
@@ -100,7 +100,7 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
     }
 
     refRequestAnimationFrame.current = requestAnimationFrame(handleShuffle);
-  }, [displayTime, emptyChars, generateRandomChars, intervalTime, text]);
+  }, [displayTime, emptyChars, generateRandomChars, intervalTime, onShufflingDone, text]);
 
   useEffect(() => {
     init();
