@@ -11,6 +11,7 @@ type ShuffleTextProps = {
   click?: boolean;
   style?: any;
   className?: string;
+  onShufflingDone?: Function;
 };
 
 export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
@@ -25,6 +26,7 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
     click = false,
     style = {},
     className = "",
+    onShufflingDone,
     children,
   } = props;
   const ShuffleTextElement = useMemo(() => {
@@ -68,7 +70,10 @@ export const ShuffleText: React.FC<ShuffleTextProps> = (props) => {
   );
 
   const handleShuffle = useCallback(() => {
-    if (outputLength.current >= text.length) return;
+    if (outputLength.current >= text.length) {
+      if (onShufflingDone) onShufflingDone();
+      return;
+    }
 
     const currentTime = new Date().getTime();
 
