@@ -71,7 +71,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="container mx-auto flex flex-col">
+    <div className="container mx-auto flex flex-col min-h-screen">
       <div className="text-center mt-6">
         <PageContent text={text} options={options} />
       </div>
